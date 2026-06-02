@@ -1,4 +1,4 @@
-# looks
+# looks 1.0.0
 
 Gerenciador de sistemas de arquivos LUKS (Linux Unified Key Setup) com interface gráfica. Requer execução como superusuário.
 

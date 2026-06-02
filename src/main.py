@@ -18,7 +18,7 @@ APPLICATION_PATH = os.getenv("APPLICATION_PATH", "./application/run.py");
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__();
-        self.setWindowTitle("looks");
+        self.setWindowTitle("looks 1.0.0");
         self.setFixedSize(850, 450);
         self.active_path = None;
         self.child_process = None;
@@ -169,7 +169,7 @@ class MainWindow(QMainWindow):
         QApplication.instance().quit();
 
     def _show_about(self):
-        QMessageBox.about(self, "About looks", "looks\nGerenciador de sistemas de arquivos LUKS.");
+        QMessageBox.about(self, "About looks", "looks 1.0.0\nGerenciador de sistemas de arquivos LUKS.");
 
 
 def main():

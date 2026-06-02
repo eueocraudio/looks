@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Projeto
 
-**looks** — aplicação desktop para gerenciamento de sistemas de arquivos LUKS (Linux Unified Key Setup). Deve ser executada como superusuário (`sudo`).
+**looks 1.0.0** — aplicação desktop para gerenciamento de sistemas de arquivos LUKS (Linux Unified Key Setup). Deve ser executada como superusuário (`sudo`).
 
 ## Executar
 
