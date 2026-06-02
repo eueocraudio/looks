@@ -1,5 +1,5 @@
 from pathlib import Path;
-from PySide6.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QFileDialog, QTextEdit;
+from PySide6.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QFileDialog, QTextEdit, QMessageBox;
 from PySide6.QtCore import QDir;
 
 PROJECT_ROOT = Path(__file__).parent.parent;
@@ -53,13 +53,20 @@ class OpenWindow(QDialog):
         if path:
             self.file_input.setText(path);
             name = Path(path).stem;
-            self.shell_output.setPlainText(f"sudo {PROJECT_ROOT}/bash/create.sh {name}");
+            cmd = (
+                f"echo -n \"SENHA\" | sudo /usr/sbin/cryptsetup open --type luks {path} {name}\n"
+                f"sudo mkdir -p /tmp/{name}\n"
+                f"sudo mount /dev/mapper/{name} /tmp/{name}"
+            );
+            self.shell_output.setPlainText(cmd);
 
     def _on_continue(self):
         path = self.file_input.text();
         if path:
             name = Path(path).stem;
             tmp_path = f"/tmp/{name}";
-            if Path(tmp_path).is_dir():
-                self.result_path = tmp_path;
-                self.accept();
+            if not Path(tmp_path).is_mount():
+                QMessageBox.warning(self, "Volume não montado", "Execute o comando no shell antes de continuar.");
+                return;
+            self.result_path = tmp_path;
+            self.accept();
