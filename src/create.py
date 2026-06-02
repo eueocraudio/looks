@@ -1,5 +1,5 @@
 from pathlib import Path;
-from PySide6.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QTextEdit;
+from PySide6.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QTextEdit, QMessageBox;
 from PySide6.QtGui import QRegularExpressionValidator;
 from PySide6.QtCore import QRegularExpression;
 
@@ -47,8 +47,13 @@ class CreateWindow(QDialog):
         self.shell_output.setPlainText(cmd);
 
     def _on_continue(self):
+        if not self.name_input.hasAcceptableInput():
+            QMessageBox.warning(self, "Aviso", "Informe um nome válido (somente letras).");
+            return;
         name = self.name_input.text();
         tmp_path = f"/tmp/{name}";
-        if Path(tmp_path).is_dir():
-            self.result_path = tmp_path;
-            self.accept();
+        if not Path(tmp_path).is_mount():
+            QMessageBox.warning(self, "Volume não montado", "Execute o comando no shell antes de continuar.");
+            return;
+        self.result_path = tmp_path;
+        self.accept();

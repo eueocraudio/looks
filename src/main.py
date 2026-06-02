@@ -49,7 +49,7 @@ class MainWindow(QMainWindow):
         change_secret_action = QAction("Change Secret", self);
         close_particao_action = QAction("Close", self);
 
-        close_particao_action.triggered.connect(self.close);
+        close_particao_action.triggered.connect(self._close_app);
 
         particao_menu.addAction(resize_action);
         particao_menu.addAction(change_secret_action);
@@ -115,17 +115,26 @@ class MainWindow(QMainWindow):
             self.open_app_button.setEnabled(True);
 
     def _launch_application(self):
+        if self.child_process and self.child_process.poll() is None:
+            return;
         if self.active_path and Path(self.active_path).is_dir():
-            sudo_user = os.getenv("SUDO_USER", os.getenv("USER"));
+            sudo_user = os.getenv("SUDO_USER");
+            if not sudo_user or sudo_user == "root":
+                QMessageBox.warning(self, "Aviso", "Execute o programa com sudo para identificar o usuário da aplicação filha.");
+                return;
             self.child_process = subprocess.Popen(
                 ["runuser", "-u", sudo_user, "--", "python3", APPLICATION_PATH, self.active_path],
                 start_new_session=True
             );
+            self.open_app_button.setEnabled(False);
             self.close_app_button.setEnabled(True);
 
     def _panic(self):
         if self.child_process and self.child_process.poll() is None:
-            os.killpg(os.getpgid(self.child_process.pid), signal.SIGKILL);
+            try:
+                os.killpg(os.getpgid(self.child_process.pid), signal.SIGKILL);
+            except OSError:
+                pass;
             self.child_process = None;
         if self.active_path:
             name = Path(self.active_path).name;
@@ -133,11 +142,13 @@ class MainWindow(QMainWindow):
             for _ in range(5):
                 try:
                     subprocess.run(["sudo", str(script), self.active_path, name]);
-                    if Path(self.active_path).exists() and not Path(self.active_path).is_mount():
-                        subprocess.run(["rm", "-r", self.active_path]);
-                    time.sleep(1);
+                    if not Path(self.active_path).is_mount():
+                        if Path(self.active_path).exists():
+                            subprocess.run(["rm", "-r", self.active_path]);
+                        break;
                 except Exception:
                     pass;
+            self.active_path = None;
         self.panic_button.setEnabled(False);
         self.open_app_button.setEnabled(False);
         self.close_app_button.setEnabled(False);
@@ -146,9 +157,13 @@ class MainWindow(QMainWindow):
         if self.child_process and self.child_process.poll() is None:
             self.child_process.terminate();
             self.child_process = None;
+            self.open_app_button.setEnabled(True);
             self.close_app_button.setEnabled(False);
 
     def _close_app(self):
+        if self.child_process and self.child_process.poll() is None:
+            self.child_process.terminate();
+            self.child_process = None;
         self.close();
         gc.collect();
         QApplication.instance().quit();
