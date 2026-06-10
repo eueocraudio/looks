@@ -133,6 +133,7 @@ class MainWindow(QMainWindow):
         if self.child_process and self.child_process.poll() is None:
             try:
                 os.killpg(os.getpgid(self.child_process.pid), signal.SIGKILL);
+                self.child_process.wait();
             except OSError:
                 pass;
             self.child_process = None;
@@ -146,6 +147,7 @@ class MainWindow(QMainWindow):
                         if Path(self.active_path).exists():
                             subprocess.run(["rm", "-r", self.active_path]);
                         break;
+                    time.sleep(0.5);
                 except Exception:
                     pass;
             self.active_path = None;

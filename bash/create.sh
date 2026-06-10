@@ -8,7 +8,7 @@ createopen(){
             read -p "Informe o tamanho em GB (exemplo 1 para 1GB): " LENGTH
             echo ""
             dd if=/dev/urandom of=/home/$SUDO_USER/$1.img bs=1M count=$(( $LENGTH * 1024  ))
-            /usr/sbin/cryptsetup luksFormat /home/$SUDO_USER/$1.img <<< 'YES' <<< "$PASSWORD" <<< "$PASSWORD"
+            printf 'YES\n%s\n%s\n' "$PASSWORD" "$PASSWORD" | /usr/sbin/cryptsetup luksFormat /home/$SUDO_USER/$1.img
             echo -n "$PASSWORD" | /usr/sbin/cryptsetup open --type luks /home/$SUDO_USER/$1.img $1
             mkfs.ext4 -L $1 /dev/mapper/$1
             /usr/sbin/cryptsetup close $1
