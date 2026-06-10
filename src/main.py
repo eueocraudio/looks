@@ -129,14 +129,17 @@ class MainWindow(QMainWindow):
             self.open_app_button.setEnabled(False);
             self.close_app_button.setEnabled(True);
 
-    def _panic(self):
+    def _kill_child_group(self, sig):
         if self.child_process and self.child_process.poll() is None:
             try:
-                os.killpg(os.getpgid(self.child_process.pid), signal.SIGKILL);
+                os.killpg(os.getpgid(self.child_process.pid), sig);
                 self.child_process.wait();
             except OSError:
                 pass;
-            self.child_process = None;
+        self.child_process = None;
+
+    def _panic(self):
+        self._kill_child_group(signal.SIGKILL);
         if self.active_path:
             name = Path(self.active_path).name;
             script = Path(__file__).parent.parent / "bash" / "close.sh";
@@ -157,15 +160,12 @@ class MainWindow(QMainWindow):
 
     def _close_child_process(self):
         if self.child_process and self.child_process.poll() is None:
-            self.child_process.terminate();
-            self.child_process = None;
+            self._kill_child_group(signal.SIGTERM);
             self.open_app_button.setEnabled(True);
             self.close_app_button.setEnabled(False);
 
     def _close_app(self):
-        if self.child_process and self.child_process.poll() is None:
-            self.child_process.terminate();
-            self.child_process = None;
+        self._kill_child_group(signal.SIGTERM);
         self.close();
         gc.collect();
         QApplication.instance().quit();

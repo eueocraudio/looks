@@ -49,7 +49,8 @@ class OpenWindow(QDialog):
         dialog = QFileDialog(self, "Selecionar arquivo .img", "/home/");
         dialog.setNameFilter("Imagens LUKS (*.img)");
         dialog.setFilter(dialog.filter() | QDir.Filter.Hidden);
-        path = dialog.selectedFiles()[0] if dialog.exec() else None;
+        selected = dialog.selectedFiles() if dialog.exec() else [];
+        path = selected[0] if selected else None;
         if path:
             self.file_input.setText(path);
             name = Path(path).stem;
